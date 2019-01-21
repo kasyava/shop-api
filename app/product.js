@@ -2,14 +2,31 @@
 import express from "express";
 import multer from "multer";
 import path from "path";
+import nanoid from "nanoid";
+
+
+import config from "../config";
+import db from "../db";
+
+
+const storage = multer.diskStorage({
+    destination(req, file, cd){
+        cd(null, config.uploadPath)
+    },
+    filename(req, file, cd){
+        cd(null, nanoid() + path.extname(file.originalname))
+    }
+});
+
+const upload = multer({storage});
+
 
 const router = express.Router();
 
-const fsDemo = require("../fsDemo");
 
 
 const data = [];
-fsDemo.init(data, ()=>console.log("Init db"));
+db.init(data, ()=>console.log("Init db"));
 
 
 router.get('/', (req, res) =>{
@@ -23,17 +40,18 @@ router.get('/:id', (req, res) =>{
 });
 
 
-router.post('/', (req, res) =>{
+router.post('/', upload.single ("image"), (req, res) =>{
     console.log(req.body);
 
+    const product = req.body;
+    if(req.file) product.image = req.file.filename;
 
-    res.send('ok');
-    /*fsDemo.addItem(data, req.body);
+    db.addItem(data, req.body);
 
-    fsDemo.saveData(data, ()=>{
-        res.send(data);
-    });
-*/
+    db.saveData(data, ()=> res.send(product));
+
+    //res.send(product);
+
 });
 
 export default router;

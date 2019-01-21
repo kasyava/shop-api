@@ -3,14 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="js/jquery-3.3.1.min.js"></script>
 </head>
 <body>
-    <form enctype="multipart/form-data" method="post" action="http://localhost:8000/products">
+    <form id="formData" enctype="multipart/form-data" method="post" action="http://localhost:8000/products">
+
         <input type="text" name = "name" id="name">
         <input type="text" name = "description" id="description">
         <input type="number" name = "price" id="price">
         <input type="file" name = "image" id="image">
-        <button>send info</button>
+        <button id="send">send info</button>
     </form>
+
+    <p id="productName"></p>
+    <p id="productDescription"></p>
+    <p id="productPrice"></p>
+    <img id="productImage" src="" alt="">
+
+    <script>
+        $(()=>{
+
+            $("#send").click((e)=>{
+                e.preventDefault();
+                const data = new FormData(document.getElementById("formData"));
+
+                $.ajax({
+                    url: 'http://localhost:8000/products',
+                    data: data,
+                    processData: false,
+                    contentType: false,
+                    type: 'POST'
+                }).then((responce) => {
+                    $("#productName").text(responce.name);
+                    $("#productDescription").text(responce.description);
+                    $("#productPrice").text(responce.price);
+                    $("#productImage").attr("src", "http://localhost:8000/uploads/" + responce.image)
+                });
+            })
+
+
+
+        });
+    </script>
+
+
+
+
+
 </body>
 </html>
